@@ -6,15 +6,15 @@ entity PC is
   port (
 	EnablePC : IN std_logic;
 	IncPC : IN std_logic;
-	inputPC: IN std_logic_vector (31 DOWNTO 0);
+	inputPC: IN std_logic_vector (23 DOWNTO 0);
 	clk : IN std_logic;
-	outputPC: OUT std_logic_vector (31 DOWNTO 0) := "00000000000000000000000000000000"
+	outputPC: OUT std_logic_vector (23 DOWNTO 0) := "000000000000000000000000"
   ) ;
 end entity ; -- PC
 
 architecture dataflow of PC is
 
-	signal outputTemp : std_logic_vector(31 DOWNTO 0);
+	signal outputTemp : std_logic_vector(23 DOWNTO 0);
 
 begin
 
@@ -22,7 +22,7 @@ programcounterpro : process( clk )
 begin
 	if clk = '1' and clk'event then
 		if IncPC = '1' then
-			outputTemp <= std_logic_vector(unsigned(outputTemp) + "00000000000000000000000000000001");
+			outputTemp <= std_logic_vector(unsigned(outputTemp) + "000000000000000000000001");
 		elsif EnablePC = '1' then
 			outputTemp <= inputPC;
 		end if ;

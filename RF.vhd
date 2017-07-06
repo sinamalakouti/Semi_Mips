@@ -8,7 +8,8 @@ entity RF is
 	RFwrite : IN std_logic;
 	in1Adr , in2Adr , outAdr : IN std_logic_vector (3 DOWNTO 0);
 	outputRFA: OUT std_logic_vector (31 DOWNTO 0);
-	outputRFB: OUT std_logic_vector (31 DOWNTO 0)
+	outputRFB: OUT std_logic_vector (31 DOWNTO 0);
+	ZeroOut : OUT std_logic
   ) ;
 end entity ; -- RF
 
@@ -20,7 +21,17 @@ architecture arch of RF is
 begin
 	myRegisters(to_integer(unsigned(outAdr))) <= inputRF when RFwrite='1' else
 													myRegisters(to_integer(unsigned(outAdr)));
-	
+
+	ZeroOut <= not (
+		myRegisters(0)(0) or myRegisters(0)(1) or myRegisters(0)(2) or myRegisters(0)(3) or
+		myRegisters(0)(4) or myRegisters(0)(5) or myRegisters(0)(6) or myRegisters(0)(7) or
+		myRegisters(0)(8) or myRegisters(0)(9) or myRegisters(0)(10) or myRegisters(0)(11) or
+		myRegisters(0)(12) or myRegisters(0)(13) or myRegisters(0)(14) or myRegisters(0)(15) or
+		myRegisters(0)(16) or myRegisters(0)(17) or myRegisters(0)(18) or myRegisters(0)(19) or
+		myRegisters(0)(20) or myRegisters(0)(21) or myRegisters(0)(22) or myRegisters(0)(23) or
+		myRegisters(0)(24) or myRegisters(0)(25) or myRegisters(0)(26) or myRegisters(0)(27) or
+		myRegisters(0)(28) or myRegisters(0)(29) or myRegisters(0)(30) or myRegisters(0)(31) 
+		);
 	
 	rfpro : process( clk )
 	begin
