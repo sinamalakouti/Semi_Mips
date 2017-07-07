@@ -10,7 +10,7 @@ architecture arch of Main is
 	  port (
 		clk : in std_logic;
 		Add0, And1, Sub2, Xor3, Or4, Mul5, Not6, Null7, Srl8, Sll9  : IN std_logic;
-		RFwrite : IN std_logic; 
+		RFwrite : IN std_logic;
 		IRLoad : IN std_logic;
 		EnablePC , IncPC : IN std_logic;
 		IRorPC : IN std_logic;
@@ -25,13 +25,14 @@ architecture arch of Main is
 	  port (
 		clk : in std_logic;
 		Add0, And1, Sub2, Xor3, Or4, Mul5, Not6, Null7, Srl8, Sll9  : out std_logic;
-		RFwrite : out std_logic; 
+		RFwrite : out std_logic;
 		IRLoad : out std_logic;
 		EnablePC , IncPC : out std_logic;
 		IRorPC : out std_logic;
 		CarrySet , CarryReset , CLoad , ZSet , ZReset , ZLoad: out std_logic;
 		readmem , writemem : out std_logic ;
 		memToDataBus , aluToDataBus : out std_logic;
+		IROut : in std_logic_vector(31 downto 0);
 		Cout , Zout : in std_logic
 	  ) ;
 	end component ; -- Controller
@@ -52,7 +53,7 @@ architecture arch of Main is
 
 begin
 
-	dp : DataPath 
+	dp : DataPath
 	  port map(
 		clk ,
 		Add0, And1, Sub2, Xor3, Or4, Mul5, Not6, Null7, Srl8, Sll9 ,
@@ -63,10 +64,10 @@ begin
 		CarrySet , CarryReset , CLoad , ZSet , ZReset , ZLoad ,
 		readmem , writemem ,
 		memToDataBus , aluToDataBus ,
-		Cout , Zout 
+		Cout , Zout
 	  ) ;
 
-	co : Controller 
+	co : Controller
 	  port map(
 		clk ,
 		Add0, And1, Sub2, Xor3, Or4, Mul5, Not6, Null7, Srl8, Sll9 ,
@@ -77,7 +78,8 @@ begin
 		CarrySet , CarryReset , CLoad , ZSet , ZReset , ZLoad ,
 		readmem , writemem ,
 		memToDataBus , aluToDataBus ,
-		Cout , Zout 
+	
+		Cout , Zout
 	  ) ;
 
 ClockGen: process
