@@ -5,7 +5,7 @@ library ieee;
 entity Controller is
   port (
 	clk : in std_logic;
-	Add0,Addi,  And1,andi,  Sub2, Xor3, Or4,ori, Mul5, Not6, Null7, Srl8, Sll9  : out std_logic;
+	Add0, And1 ,  Sub2 , Xor3 , Or4 , Mul5 , Not6 , Null7 , Srl8 , Sll9 , Addi10 , Andi11 , Ori12  : out std_logic;
 	RFwrite : out std_logic;
 	IRLoad : out std_logic;
 	EnablePC , IncPC : out std_logic;
@@ -52,13 +52,13 @@ process(currentState)
     IRorPC <= '1';
     RFwrite <= '0';
     Add0 <='0';
-    Addi <= '0';
+    Addi10 <= '0';
     And1 <= '0';
-    andi <= '0';
+    Andi11 <= '0';
     Sub2 <='0';
     Xor3 <= '0';
     Or4 <= '0';
-    ori <='0';
+    Ori12 <='0';
     Mul5 <='0';
     Not6 <= '0';
     Null7 <= '0';
@@ -71,10 +71,14 @@ process(currentState)
       when reset =>
         EnablePC <='1';
         nextState <= fetch;
-      when fetch <=
+      when fetch =>
         readmem <= '1';
         IRLoad <= '1';
         nextState <= decode;
+      when pcInc =>
+          IncPC <='1';
+          EnablePC <='1';
+          nextState <= fetch;
       when decode =>
         case(IROut(31 downto 28)) is
 
@@ -85,83 +89,92 @@ process(currentState)
            EnablePC <='1';
            aluToDataBus <='1';
            nextState <= fetch;
+
           --  add i
           when "0001" =>
-            Addi <='1';
+            Addi10 <='1';
             IncPC <='1';
             EnablePC <='1';
             aluToDataBus <= '1';
             nextState <= fetch;
-            -- subtract
+
+          -- subtract
           when "0010" =>
               sub2 <= '0';
               IncPC <='1';
               EnablePC <='1';
               aluToDataBus <='1';
               nextState <= fetch;
-              --  and
+
+          --  and
           when "0011" =>
             And1 <='1';
             aluToDataBus <='1';
             IncPC <='1';
             EnablePC <='1';
             nextState <=fetch;
-            --  and i
+
+          --  and i
           when "0100" =>
-            andi <='1';
+            Andi11 <='1';
             aluToDataBus <='1';
             IncPC <='1';
             EnablePC <='1';
             nextState <=fetch;
-            --  or
+
+          --  or
           when "0101" =>
             Or4 <='1';
             aluToDataBus <='1';
             IncPC<='1';
             EnablePC <='1';
             nextState <= fetch;
-            --  or i
+
+          --  or i
           when "0110" =>
-            ori <='1';
+            Ori12 <='1';
             aluToDataBus <='1';
             IncPC <='1';
             EnablePC <='1';
             nextState <= fetch;
-            --  xor
+
+          --  xor
           when "0111" =>
             Xor3 <= '1';
             aluToDataBus <='1';
             IncPC <='1';
             EnablePC <='1';
             nextState <= fetch;
-            --  not
+
+          --  not
           when "1000" =>
               not6 <='1';
               IncPC <='1';
               EnablePC <= '1';
               aluToDataBus <='1';
               nextState <= fetch;
-              -- multiply
+
+          -- multiply
           when "1001" =>
             Mul5 <='1';
             IncPC <='1';
             EnablePC <='1';
             aluToDataBus <='1';
             nextState <= fetch;
-            -- jmp
+
+          -- jmp
           when "1010" =>
             Null7 <='1';
             aluToDataBus <='1';
             EnablePC <='1';
             nextState  <= fetch;
+
           -- sll9
           when "1011" =>
           sll9 <='1';
           aluToDataBus <='1';
           IncPC <='1';
           nextState <= fetch;
-
-
 
           -- Srl8
           when "1100" =>
@@ -187,26 +200,19 @@ process(currentState)
           nextState <=pcInc;
 
           --  brnz
-          when others =>
-        if Zout = '1' then
-            nextState <= fetch;
-            pcInc <='1';
-          else
-            pcInc <='1';
-            nextState <=fetch;
-
-        end if;
+          when "1111" =>
+            if Zout = '1' then
+                nextState <= fetch;
+                IncPC <='1';
+            else
+                IncPC <='1';
+                nextState <=fetch;
+            end if;
 
 
         end case;
 
-
-        when pcInc =>
-          IncPC <='1';
-          EnablePC <='1';
-          nextState <= fetch;
-
-      when others =>
+      when reset =>
       nextState <= reset;
 
     end case;

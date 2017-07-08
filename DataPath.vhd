@@ -4,7 +4,7 @@ use IEEE.numeric_std.all;
 entity DataPath is
   port (
 	clk : in std_logic;
-	Add0, And1, Sub2, Xor3, Or4, Mul5, Not6, Null7, Srl8, Sll9  : IN std_logic;
+	Add0, And1, Sub2, Xor3, Or4, Mul5, Not6, Null7, Srl8, Sll9 , Addi10 , Andi11 , Ori12  : IN std_logic;
 	RFwrite : IN std_logic; 
 	IRLoad : IN std_logic;
 	EnablePC , IncPC : IN std_logic;
@@ -12,6 +12,7 @@ entity DataPath is
 	CarrySet , CarryReset , CLoad , ZSet , ZReset , ZLoad: IN std_logic;
 	readmem , writemem : IN std_logic ;
 	memToDataBus , aluToDataBus : IN std_logic;
+	IRData : OUT std_logic_vector (31 downto 0);
 	Cout , Zout : OUT std_logic
   ) ;
 end entity ; -- DataPath
@@ -20,9 +21,10 @@ architecture arch of DataPath is
 
 	component ALU is
 	  port (
-		Add0, And1, Sub2, Xor3, Or4, Mul5, Not6, Null7, Srl8, Sll9  : IN std_logic;
+		Add0, And1, Sub2, Xor3, Or4, Mul5, Not6, Null7, Srl8, Sll9 , Addi10 , Andi11 , Ori12  : IN std_logic;
 		in1, in2 : IN std_logic_vector (31 DOWNTO 0);
 		carryIn : In std_logic;
+		I : IN std_logic_vector (15 downto 0);
 		amount : IN std_logic_vector(4 downto 0);
 		res : OUT std_logic_vector (31 DOWNTO 0);
 		carryOut : out std_logic;
@@ -103,9 +105,10 @@ architecture arch of DataPath is
 begin
 
 	aluUnit : ALU PORT MAP (
-			Add0, And1, Sub2, Xor3, Or4, Mul5, Not6, Null7, Srl8, Sll9,
+			Add0, And1, Sub2, Xor3, Or4, Mul5, Not6, Null7, Srl8, Sll9, Addi10 , Andi11 , Ori12,
 			RFOut1 , RFOut2,
 			FlagsCarryOut,
+			IROut(15 downto 0),
 			IROut(15 downto 11),
 			ALUout ,
 			ALUCarrayOut ,
@@ -171,6 +174,7 @@ begin
 		aluToDataBus
 		);
 
+	IRData <= IROut;
 	Cout <= FlagsCarryOut;
 	Zout <= FlagsZeroOut;
 

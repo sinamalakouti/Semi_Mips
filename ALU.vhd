@@ -4,9 +4,10 @@ use IEEE.numeric_std.all;
 --todo can be done in better ways.
 entity ALU is
   port (
-	Add0,Addi, And1, Sub2, Xor3, Or4, Mul5, Not6, Null7, Srl8, Sll9  : IN std_logic;
+	Add0,Addi, And1, Sub2, Xor3, Or4, Mul5, Not6, Null7, Srl8, Sll9 , Addi10 , Andi11 , Ori12  : IN std_logic;
 	in1, in2 : IN std_logic_vector (31 DOWNTO 0);
 	carryIn : In std_logic;
+	I : IN std_logic_vector (15 downto 0);
 	amount : IN std_logic_vector(4 downto 0);
 	res : OUT std_logic_vector (31 DOWNTO 0);
 	carryOut : out std_logic;
@@ -120,15 +121,18 @@ architecture arch of ALU is
 	  ) ;
 	end component ; -- Sll_Mod
 
-	type resultArray is array (0 to 9) of std_logic_vector( 31 DOWNTO 0 );
-	type carryArray is array (0 to 9) of std_logic;
-	signal chooser : std_logic_vector(9 DOWNTO 0);
+	type resultArray is array (0 to 12) of std_logic_vector( 31 DOWNTO 0 );
+	type carryArray is array (0 to 12) of std_logic;
+	signal chooser : std_logic_vector(12 DOWNTO 0);
 	signal outputs : resultArray;
 	signal Carry : carryArray;
+	signal Itemp : std_logic_vector (31 downto 0);
 
 begin
 
-	chooser <= (Add0 & And1 & Sub2 & Xor3 & Or4 & Mul5 & not6 & Null7 & Srl8 & Sll9);
+	Itemp <= ("0000000000000000" & I);
+
+	chooser <= (Add0 & And1 & Sub2 & Xor3 & Or4 & Mul5 & not6 & Null7 & Srl8 & Sll9 & Addi10 & Andi11 & Ori12);
 
 	addM     : Add_Mod     port map (in1 , in2 , carryIn , outputs(0) , Carry(0));
 	andM     : And_Mod     port map (in1 , in2 , carryIn , outputs(1) , Carry(1));
@@ -140,29 +144,38 @@ begin
 	nothingM : Nothing_Mod port map (in1 , in2 , carryIn , outputs(7) , Carry(7));
 	srlM     : Srl_Mod     port map (in1 , in2 , carryIn , outputs(8) , Carry(8) , amount , clk);
 	sllM     : Sll_Mod     port map (in1 , in2 , carryIn , outputs(9) , Carry(9) , amount , clk);
+	addiM    : Add_Mod     port map (in1 , Itemp , carryIn , outputs(10) , Carry(10));
+	andiM    : And_Mod     port map (in1 , Itemp , carryIn , outputs(11) , Carry(11));
+	oriM     : Or_Mod      port map (in1 , Itemp , carryIn , outputs(12) , Carry(12));
 
-    res  <= outputs(0 ) when chooser = "1000000000" else
-			outputs(1 ) when chooser = "0100000000" else
-			outputs(2 ) when chooser = "0010000000" else
-			outputs(3 ) when chooser = "0001000000" else
-			outputs(4 ) when chooser = "0000100000" else
-			outputs(5 ) when chooser = "0000010000" else
-			outputs(6 ) when chooser = "0000001000" else
-			outputs(7 ) when chooser = "0000000100" else
-			outputs(8 ) when chooser = "0000000010" else
-			outputs(9 ) when chooser = "0000000001" else
+    res  <= outputs(0 ) when chooser = "1000000000000" else
+			outputs(1 ) when chooser = "0100000000000" else
+			outputs(2 ) when chooser = "0010000000000" else
+			outputs(3 ) when chooser = "0001000000000" else
+			outputs(4 ) when chooser = "0000100000000" else
+			outputs(5 ) when chooser = "0000010000000" else
+			outputs(6 ) when chooser = "0000001000000" else
+			outputs(7 ) when chooser = "0000000100000" else
+			outputs(8 ) when chooser = "0000000010000" else
+			outputs(9 ) when chooser = "0000000001000" else
+			outputs(10) when chooser = "0000000000100" else
+			outputs(11) when chooser = "0000000000010" else
+			outputs(12) when chooser = "0000000000001" else
 			"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
 
-	carryOut <= Carry(0 ) when chooser = "1000000000" else
-				Carry(1 ) when chooser = "0100000000" else
-				Carry(2 ) when chooser = "0010000000" else
-				Carry(3 ) when chooser = "0001000000" else
-				Carry(4 ) when chooser = "0000100000" else
-				Carry(5 ) when chooser = "0000010000" else
-				Carry(6 ) when chooser = "0000001000" else
-				Carry(7 ) when chooser = "0000000100" else
-				Carry(8 ) when chooser = "0000000010" else
-				Carry(9 ) when chooser = "0000000001" else
+	carryOut <= Carry(0 ) when chooser = "1000000000000" else
+				Carry(1 ) when chooser = "0100000000000" else
+				Carry(2 ) when chooser = "0010000000000" else
+				Carry(3 ) when chooser = "0001000000000" else
+				Carry(4 ) when chooser = "0000100000000" else
+				Carry(5 ) when chooser = "0000010000000" else
+				Carry(6 ) when chooser = "0000001000000" else
+				Carry(7 ) when chooser = "0000000100000" else
+				Carry(8 ) when chooser = "0000000010000" else
+				Carry(9 ) when chooser = "0000000001000" else
+				Carry(10) when chooser = "0000000000100" else
+				Carry(11) when chooser = "0000000000010" else
+				Carry(12) when chooser = "0000000000001" else
 				'X';
 
 end architecture ; -- arch
