@@ -4,7 +4,7 @@ use IEEE.numeric_std.all;
 --todo can be done in better ways.
 entity ALU is
   port (
-	Add0,Addi, And1, Sub2, Xor3, Or4, Mul5, Not6, Null7, Srl8, Sll9 , Addi10 , Andi11 , Ori12  : IN std_logic;
+	Add0, And1, Sub2, Xor3, Or4, Mul5, Not6, Null7, Srl8, Sll9 , Addi10 , Andi11 , Ori12  : IN std_logic;
 	in1, in2 : IN std_logic_vector (31 DOWNTO 0);
 	carryIn : In std_logic;
 	I : IN std_logic_vector (15 downto 0);

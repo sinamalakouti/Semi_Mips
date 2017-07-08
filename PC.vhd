@@ -14,7 +14,7 @@ end entity ; -- PC
 
 architecture dataflow of PC is
 
-	signal outputTemp : std_logic_vector(23 DOWNTO 0);
+	signal outputTemp : std_logic_vector(23 DOWNTO 0) := "000000000000000000000000";
 
 begin
 

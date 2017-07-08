@@ -5,14 +5,15 @@ entity DataPath is
   port (
 	clk : in std_logic;
 	Add0, And1, Sub2, Xor3, Or4, Mul5, Not6, Null7, Srl8, Sll9 , Addi10 , Andi11 , Ori12  : IN std_logic;
-	RFwrite : IN std_logic; 
+	RFwrite ,switch : IN std_logic; 
 	IRLoad : IN std_logic;
 	EnablePC , IncPC : IN std_logic;
 	IRorPC : IN std_logic;
-	CarrySet , CarryReset , CLoad , ZSet , ZReset , ZLoad: IN std_logic;
+	CarrySet , CarryReset , CLoad , ZSet , ZReset: IN std_logic;
 	readmem , writemem : IN std_logic ;
 	memToDataBus , aluToDataBus : IN std_logic;
 	IRData : OUT std_logic_vector (31 downto 0);
+	memdataready : OUT std_logic;
 	Cout , Zout : OUT std_logic
   ) ;
 end entity ; -- DataPath
@@ -36,7 +37,7 @@ architecture arch of DataPath is
 	  port (
 		clk : IN std_logic;
 		inputRF: IN std_logic_vector (31 DOWNTO 0);
-		RFwrite : IN std_logic;
+		RFwrite , switch : IN std_logic;
 		in1Adr , in2Adr , outAdr : IN std_logic_vector (3 DOWNTO 0);
 		outputRFA: OUT std_logic_vector (31 DOWNTO 0);
 		outputRFB: OUT std_logic_vector (31 DOWNTO 0);
@@ -72,7 +73,6 @@ architecture arch of DataPath is
 	end component ; -- TrieState
 
 	component Mem is
-		generic (blocksize : integer := 1024);
 		port (clk, readmem, writemem : in std_logic;
 			addressbus: in std_logic_vector (23 downto 0);
 			input : in std_logic_vector (31 downto 0);
@@ -90,9 +90,9 @@ architecture arch of DataPath is
 
 	component Flags is
 	  port (
-		Cin , CSet , CReset , SRLoad , clk : IN std_logic;
+		Cin , CSet , CReset , CLoad , clk : IN std_logic;
 		Cout : OUT std_logic;
-		Zin , ZSet , ZReset , ZLoad : IN std_logic;
+		Zin , ZSet , ZReset : IN std_logic;
     	Zout : OUT std_logic
 	  ) ;
 	end component ; -- Flags
@@ -118,8 +118,8 @@ begin
 	RFUnit : RF PORT MAP (
 			clk ,
 			dataBus,
-			RFwrite,
-			IROut(27 downto 24), IROut(23 downto 20) , IROut(19 downto 16),
+			RFwrite , switch,
+			IROut(23 downto 20), IROut(19 downto 16) , IROut(27 downto 24),
 			RFOut1,
 			RFOut2,
 			RFZeroOut
@@ -135,7 +135,7 @@ begin
 	PCUnit : PC PORT MAP (
 			EnablePC , 
 			IncPC ,
-			dataBus (23 downto 0) ,
+			IROut (23 downto 0) ,
 			clk ,
 			PCOut
 		);
@@ -149,17 +149,17 @@ begin
 	flagsUnit : Flags PORT MAP (
 			ALUCarrayOut , CarrySet , CarryReset , CLoad , clk ,
 			FlagsCarryOut ,
-			RFZeroOut , ZSet , ZReset , ZLoad ,
+			RFZeroOut , ZSet , ZReset ,
 			FlagsZeroOut
 		);
 
 	memUnit : Mem 
-	generic MAP(16777216)
 	PORT MAP (
 		clk , readmem , writemem ,
 		addressBus ,
 		dataBus ,
-		memDataOutput
+		memDataOutput,
+		memdataready
 		);
 
 	memToDataBusUnit : TrieState_32 PORT MAP (

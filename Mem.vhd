@@ -3,10 +3,10 @@ use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
 
 entity Mem is
-	generic (blocksize : integer := 1024);
+	generic (blocksize : integer := 16777216);
 
 	port (clk, readmem, writemem : in std_logic;
-		addressbus: in std_logic_vector (24 downto 0);
+		addressbus: in std_logic_vector (23 downto 0);
 		input : in std_logic_vector (31 downto 0);
 		output : out std_logic_vector (31 downto 0);
 		memdataready : out std_logic);
@@ -22,12 +22,25 @@ begin
 	begin
 		if init = true then
 			-- some initiation
-		buffermem(0) := "1111000010000011";--mil
-     	buffermem(1) := "1111000110000011";--mih
-     	buffermem(2) := "1111010000001000";--mil
-     	buffermem(3) := "1111010100000000";--mih
-     	buffermem(4) := "0011010000101001";--sta lda
-     	buffermem(5) := "0101011001001101";--oup inp
+		buffermem(0) := "00000000000100010000000000000000";--add
+		buffermem(1) := "10100000000000000000000000010000";--jmp
+		buffermem(15) := "11101111111111100001000100010001";--num
+		buffermem(16) := "00100000000000000000000000000000";--num
+		buffermem(17) := "11100000000000000000000000001111";--lda
+		buffermem(18) := "11010000000000000000000000001110";--str
+		buffermem(19) := "11110000000000000000000000100000";--brnz
+		buffermem(20) := "00000000000100010000000000000000";--add
+		buffermem(32) := "00100000000000010000000000000000";--sub
+		buffermem(33) := "11110000000000000000000001000000";--brnz
+		buffermem(34) := "00010000000100010000000000000000";--addi
+		buffermem(64) := "01000000000100010000000000000000";--andi
+
+		
+     	--buffermem(1) := "1111000110000011";--mih
+     	--buffermem(2) := "1111010000001000";--mil
+     	--buffermem(3) := "1111010100000000";--mih
+     	--buffermem(4) := "0011010000101001";--sta lda
+     	--buffermem(5) := "0101011001001101";--oup inp
      	
 			
 			init := false;

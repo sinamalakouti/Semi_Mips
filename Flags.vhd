@@ -5,7 +5,7 @@ entity Flags is
   port (
     Cin , CSet , CReset , CLoad , clk : IN std_logic;
     Cout : OUT std_logic;
-    Zin , ZSet , ZReset , ZLoad : IN std_logic;
+    Zin , ZSet , ZReset : IN std_logic;
     Zout : OUT std_logic
   ) ;
 end entity ; -- Flags
@@ -24,8 +24,7 @@ begin
 
   zBetween <= '0' when ZReset = '1' else
               '1' when ZSet = '1' else
-              Zin when ZLoad= '1' else
-              zBetween;
+              Zin ;
 
   flagsPro : process( clk )
   begin

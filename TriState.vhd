@@ -13,6 +13,6 @@ architecture arch of TrieState_32 is
 
 begin
 
-	outputB <= inputB when (Control = '1') else "ZZZZZZZZZZZZZZZZ";
+	outputB <= inputB when (Control = '1') else "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
 
 end architecture ; -- arch

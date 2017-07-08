@@ -6,37 +6,37 @@ entity Controller is
   port (
 	clk : in std_logic;
 	Add0, And1 ,  Sub2 , Xor3 , Or4 , Mul5 , Not6 , Null7 , Srl8 , Sll9 , Addi10 , Andi11 , Ori12  : out std_logic;
-	RFwrite : out std_logic;
+	RFwrite , switch : out std_logic;
 	IRLoad : out std_logic;
 	EnablePC , IncPC : out std_logic;
 	IRorPC : out std_logic;
-	CarrySet , CarryReset , CLoad , ZSet , ZReset , ZLoad: out std_logic;
+	CarrySet , CarryReset , CLoad , ZSet , ZReset: out std_logic;
 	readmem , writemem : out std_logic ;
 	memToDataBus , aluToDataBus : out std_logic;
   IROut : in std_logic_vector(31 downto 0);
+  memdataready : IN std_logic;
   Cout , Zout : in std_logic
   ) ;
 end entity;
 
 architecture arch of Controller is
 
-type states is  ( reset , fetch , decode , halt, pcInc, shiftRight, shiftLeft);
+--type states is  ( reset , fetch , decode , halt, pcInc , prefetch);
+type states is ( reset , prefetch , fetch , decode , add_0 , addi_0 , sub_0 , and_0 , andi_0 , or_0 , ori_0 , xor_0 , not_0 , mul_0 , 
+                jmp_0 , sll_0 , srl_0 , str_0 , lda_0 , brnz_0 );
 signal currentState : states := reset;
 signal nextState : states;
 begin
 
-identifier : process(clk)
-begin
-  if clk'event and clk ='1' then
-      currentState <= nextState;
-  end if;
 
-end process;
-
-
-process(currentState)
+process(clk)
   begin
 
+    if clk'event and clk ='1' then
+      currentState <= nextState;
+    end if;
+
+    switch <= '0';
     aluToDataBus <='0';
     IRLoad <= '0';
     EnablePC <= '0';
@@ -64,162 +64,219 @@ process(currentState)
     Null7 <= '0';
     Srl8 <= '0';
     Sll9 <= '0';
+
     case( currentState ) is
 
-      when halt =>
-        nextState <= halt;
       when reset =>
-        EnablePC <='1';
-        nextState <= fetch;
+        nextState <= prefetch;
+
+      when prefetch =>
+        memToDataBus <= '1';
+        readmem <= '1';
+        IRLoad <= '1';
+        if (memdataready = '0') then 
+          nextState <= prefetch;
+        else 
+          nextState <= fetch;
+        end if;
+
       when fetch =>
+        memToDataBus <= '1';
         readmem <= '1';
         IRLoad <= '1';
         nextState <= decode;
-      when pcInc =>
-          IncPC <='1';
-          EnablePC <='1';
-          nextState <= fetch;
+
       when decode =>
         case(IROut(31 downto 28)) is
-
           -- add
           when  "0000" =>
-           Add0 <= '1';
-           IncPC <='1';
-           EnablePC <='1';
-           aluToDataBus <='1';
-           nextState <= fetch;
+           nextState <= add_0;
 
           --  add i
           when "0001" =>
-            Addi10 <='1';
-            IncPC <='1';
-            EnablePC <='1';
-            aluToDataBus <= '1';
-            nextState <= fetch;
+            nextState <= addi_0;
 
           -- subtract
           when "0010" =>
-              sub2 <= '0';
-              IncPC <='1';
-              EnablePC <='1';
-              aluToDataBus <='1';
-              nextState <= fetch;
+              nextState <= sub_0;
 
           --  and
           when "0011" =>
-            And1 <='1';
-            aluToDataBus <='1';
-            IncPC <='1';
-            EnablePC <='1';
-            nextState <=fetch;
+            nextState <= and_0;
 
           --  and i
           when "0100" =>
-            Andi11 <='1';
-            aluToDataBus <='1';
-            IncPC <='1';
-            EnablePC <='1';
-            nextState <=fetch;
+            nextState <= andi_0;
 
           --  or
           when "0101" =>
-            Or4 <='1';
-            aluToDataBus <='1';
-            IncPC<='1';
-            EnablePC <='1';
-            nextState <= fetch;
+            nextState <= or_0;
 
           --  or i
           when "0110" =>
-            Ori12 <='1';
-            aluToDataBus <='1';
-            IncPC <='1';
-            EnablePC <='1';
-            nextState <= fetch;
+            nextState <= ori_0;
 
           --  xor
           when "0111" =>
-            Xor3 <= '1';
-            aluToDataBus <='1';
-            IncPC <='1';
-            EnablePC <='1';
-            nextState <= fetch;
+            nextState <= xor_0;
 
           --  not
           when "1000" =>
-              not6 <='1';
-              IncPC <='1';
-              EnablePC <= '1';
-              aluToDataBus <='1';
-              nextState <= fetch;
+              nextState <= not_0;
 
           -- multiply
           when "1001" =>
-            Mul5 <='1';
-            IncPC <='1';
-            EnablePC <='1';
-            aluToDataBus <='1';
-            nextState <= fetch;
+            nextState <= mul_0;
 
           -- jmp
           when "1010" =>
-            Null7 <='1';
-            aluToDataBus <='1';
-            EnablePC <='1';
-            nextState  <= fetch;
+            nextState  <= jmp_0;
 
           -- sll9
           when "1011" =>
-          sll9 <='1';
-          aluToDataBus <='1';
-          IncPC <='1';
-          nextState <= fetch;
+          nextState <= sll_0;
 
           -- Srl8
           when "1100" =>
-          Srl8 <='1';
-          aluToDataBus <='1';
-          IncPC <='1';
-          nextState <= fetch;
+          nextState <= srl_0;
 
           -- store
           when "1101" =>
-          IRorPC <= '0';
-          -- IncPC <='1';
-          Null7 <='1';
-          aluToDataBus <='1';
-          nextState <= pcInc;
+          nextState <= str_0;
 
           --  load
           when "1110" =>
-          IRorPC <= '0';
-          memToDataBus <='1';
-          RFwrite <='1';
-          -- IncPC <='1';
-          nextState <=pcInc;
+          switch <= '1';
+          nextState <= lda_0;
 
           --  brnz
           when "1111" =>
-            if Zout = '1' then
-                nextState <= fetch;
-                IncPC <='1';
-            else
-                IncPC <='1';
-                nextState <=fetch;
-            end if;
+          nextState <= brnz_0;
 
-
+          when others =>
         end case;
 
-      when reset =>
-      nextState <= reset;
+        when add_0 =>
+           Add0 <= '1';
+           IncPC <='1';
+           RFwrite <= '1';
+           aluToDataBus <='1';
+           nextState <= prefetch;
 
-    end case;
+        when addi_0 =>
+            Addi10 <= '1';
+            IncPC <='1';
+            RFwrite <= '1';
+            aluToDataBus <='1';
+            nextState <= prefetch;
 
-end process;
+        when sub_0 =>
+            Sub2 <= '1';
+            IncPC <='1';
+            RFwrite <= '1';
+            aluToDataBus <='1';
+            nextState <= prefetch;
 
+        when and_0 =>
+            And1 <= '1';
+            IncPC <='1';
+            RFwrite <= '1';
+            aluToDataBus <='1';
+            nextState <= prefetch;
 
+        when andi_0 =>
+            Andi11 <= '1';
+            IncPC <='1';
+            RFwrite <= '1';
+            aluToDataBus <='1';
+            nextState <= prefetch;
 
+        when or_0 =>
+            Or4 <= '1';
+            IncPC <='1';
+            RFwrite <= '1';
+            aluToDataBus <='1';
+            nextState <= prefetch;
 
+        when ori_0 =>
+            Ori12 <= '1';
+            IncPC <='1';
+            RFwrite <= '1';
+            aluToDataBus <='1';
+            nextState <= prefetch;
+
+        when xor_0 =>
+            Xor3 <= '1';
+            IncPC <='1';
+            RFwrite <= '1';
+            aluToDataBus <='1';
+            nextState <= prefetch;
+
+        when not_0 =>
+            Not6 <= '1';
+            IncPC <='1';
+            RFwrite <= '1';
+            aluToDataBus <='1';
+            nextState <= prefetch;
+
+        when mul_0 =>
+            Mul5 <= '1';
+            IncPC <='1';
+            RFwrite <= '1';
+            aluToDataBus <='1';
+            nextState <= prefetch;
+
+        when jmp_0 =>
+            EnablePC <= '1';
+            nextState <= prefetch;
+
+        when sll_0 =>
+            sll9 <= '1';
+            IncPC <='1';
+            RFwrite <= '1';
+            aluToDataBus <='1';
+            nextState <= prefetch;
+
+        when srl_0 =>
+            Srl8 <= '1';
+            IncPC <='1';
+            RFwrite <= '1';
+            aluToDataBus <='1';
+            nextState <= prefetch;
+
+        when str_0 =>
+            switch <= '1';
+            Null7 <= '1';
+            aluToDataBus <= '1';
+            IRorPC <= '0';
+            writemem <= '1';
+            if memdataready = '0' then
+              nextState <= str_0;
+            else 
+              IncPC <= '1';
+              nextState <= prefetch;
+            end if ;
+
+        when lda_0 =>
+            IRorPC <= '0';
+            RFwrite <= '1';
+            readmem <= '1';
+            memToDataBus <= '1';
+            if memdataready = '0' then
+              nextState <= lda_0;
+            else 
+              IncPC <= '1'; 
+              nextState <= prefetch;
+            end if ;
+
+        when brnz_0 =>
+            if Zout = '0' then
+              EnablePC <= '1';
+            else
+              IncPC <= '1';  
+            end if ;
+            nextState <= prefetch;
+
+      end case;
+    end process;
 end architecture;
